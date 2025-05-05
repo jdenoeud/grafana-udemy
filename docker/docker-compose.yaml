@@ -11,13 +11,12 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    user: "1000:1000"
     volumes:
       - ./shared/prometheus:/etc/prometheus
-      - ./shared/prometheus/data:/prometheus
+      - prometheus-data:/prometheus
     ports:
       - "9090:9090"
-    entrypoint: sh -c "wget --no-check-certificate -O /etc/prometheus/prometheus-local.yml https://raw.githubusercontent.com/aussiearef/grafana-udemy/main/prometheus/prometheus.yml && exec /bin/prometheus --config.file=/etc/prometheus/prometheus-local.yml --web.enable-remote-write-receiver"
+    entrypoint: sh -c "exec /bin/prometheus --config.file=/etc/prometheus/prometheus-local.yml --web.enable-remote-write-receiver"
 
   loki:
     image: grafana/loki:latest
@@ -52,7 +51,9 @@ services:
     image: grafana/grafana:latest
     user: "1000:1000"
     volumes:
-      - ./shared/grafana/provisioning/datasources/:/etc/grafana/provisioning/datasources
+      - ./shared/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./shared/grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
+      - ./shared/grafana/dashboards:/var/lib/grafana/dashboards
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=false
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
